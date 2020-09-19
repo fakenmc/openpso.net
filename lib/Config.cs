@@ -15,9 +15,17 @@ namespace OpenPSO.Lib
         public double XMax { get; }
         public double VMax { get; }
 
+        // public int PopSize { get; }
+
         public Random Rng { get; }
 
         public readonly IFunction function;
+
+        public readonly int maxEvals;
+
+        public readonly double criteria;
+
+        public readonly bool critKeepGoing;
 
         public Config()
         {

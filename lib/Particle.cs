@@ -1,5 +1,6 @@
 using System;
-//using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace OpenPSO.Lib
 {
@@ -10,12 +11,16 @@ namespace OpenPSO.Lib
         //void* neigh_info;
         private int id;
         private double fitness;
-        private double best_fitness_so_far;
-        private double informants_best_fitness_so_far;
-        private double[] informants_best_position_so_far;
 
+        // Best fitness this particle ever had so far
+        private double bestFitnessSoFar;
         // Best position so far for this particle
-        private double[] pBest;
+        private double[] bestPositionSoFar;
+
+        // Best fitness ever known by neighbors
+        private double neighsBestFitnessSoFar;
+
+        private double[] neighsBestPositionSoFar;
 
         private double[] position;
         private double[] velocity;
@@ -33,6 +38,14 @@ namespace OpenPSO.Lib
         // public IList<double> Position => position;
         // public IList<double> Velocity => velocity;
 
+        public IEnumerable<Particle> Neighbors => null; // TODO Connect this to ITopology
+
+        public double BestFitnessSoFar => bestFitnessSoFar;
+
+        public double NeighsBestFitnessSoFar => neighsBestFitnessSoFar;
+        //public ReadOnlyCollection<double> NeighsBestPositionSoFar =>
+        //    Array.AsReadOnly(neighsBestPositionSoFar);
+
 
         public Particle(Config cfg)
         {
@@ -40,14 +53,23 @@ namespace OpenPSO.Lib
             nDim = position.Length;
         }
 
+        public void UpdateBest(Particle neighbor)
+        {
+            neighsBestFitnessSoFar = neighbor.BestFitnessSoFar;
+            Array.Copy(
+                neighbor.bestPositionSoFar, // Source
+                neighsBestPositionSoFar,    // Destination
+                nDim);
+        }
 
-        private void Update()
+
+        public void Update()
         {
             for (int i = 0; i < nDim; i++)
             {
                 // Update velocity
                 velocity[i] = cfg.W * velocity[i]
-                    + cfg.C1 * cfg.Rng.NextDouble() * (pBest[i] - position[i])
+                    + cfg.C1 * cfg.Rng.NextDouble() * (bestPositionSoFar[i] - position[i])
                     + cfg.C2 * cfg.Rng.NextDouble() * (gBest(i) - position[i]);
 
                 // Keep velocity in bounds
