@@ -60,9 +60,30 @@ namespace OpenPSO.Lib
 
             for (int i = 0; i < nDim; i++)
             {
-                // TODO What if [xMin, xMax] is different for different dimensions?
-                position[i] = cfg.Rng.NextDouble(cfg.InitXMin, cfg.InitXMax);
+                // Initialize position for current variable of current particle
+                position[i] = cfg.Rng.NextDouble(cfg.InitXMin, cfg.InitXMax); // TODO What if [xMin, xMax] is different for different dimensions?
+
+                // Initialize velocity for current variable of current particle
+                velocity[i] = cfg.Rng.NextDouble(-cfg.XMax, cfg.XMax)
+                    * cfg.Rng.NextDouble(-0.5, 0.5);
             }
+
+            // Set best position so far as current position
+            Array.Copy(position, bestPositionSoFar, nDim);
+
+            // Set best neighbor position so far as myself
+            Array.Copy(position, neighsBestPositionSoFar, nDim);
+
+            // Determine fitness for initial position
+            fitness = cfg.function.Evaluate(position);
+
+            // TODO Hooks such as watershed
+
+            // Set my own fitness as best fitness so far
+            bestFitnessSoFar = fitness;
+
+            // Set me as the best neighbor so far
+            neighsBestFitnessSoFar = fitness;
         }
 
         public void UpdateBestNeighbor(Particle neighbor)
