@@ -7,7 +7,7 @@ namespace OpenPSO.Lib
     public class PSO
     {
 
-        private int totalEvals = 0;
+        private int totalEvals;
 
         private Config cfg;
         private IList<Particle> particles;
@@ -45,6 +45,16 @@ namespace OpenPSO.Lib
 
             // TODO Topology
 
+            // Initialize bestSoFar as first particle
+            bestSoFar = (particles[0].Fitness,
+                particles[0].Position.ToArray(), particles[0]);
+
+            // TODO This is probably not required here, since we're doing it
+            // in UpdatePopData()
+            // bestCurr = (particles[0].Fitness, particles[0]);
+            // worstCurr = (particles[0].Fitness, particles[0]);
+
+            totalEvals = 0;
         }
 
         /// <summary>
