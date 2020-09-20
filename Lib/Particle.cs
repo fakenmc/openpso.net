@@ -52,11 +52,17 @@ namespace OpenPSO.Lib
         //    Array.AsReadOnly(neighsBestPositionSoFar);
 
 
-        public Particle(int id, Config cfg)
+        public Particle(int id, Config cfg, Func<int, double> gBest)
         {
             this.id = id;
             this.cfg = cfg;
-            nDim = position.Length;
+            this.gBest = gBest;
+            nDim = cfg.nDims;
+
+            position = new double[nDim];
+            velocity = new double[nDim];
+            bestPositionSoFar = new double[nDim];
+            neighsBestPositionSoFar = new double[nDim];
 
             for (int i = 0; i < nDim; i++)
             {
@@ -75,7 +81,7 @@ namespace OpenPSO.Lib
             Array.Copy(position, neighsBestPositionSoFar, nDim);
 
             // Determine fitness for initial position
-            fitness = cfg.function.Evaluate(position);
+            fitness = cfg.function.Evaluate(position); // TODO Doesn't this count for PSO.TotalEvals?
 
             // TODO Hooks such as watershed
 

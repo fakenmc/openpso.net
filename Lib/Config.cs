@@ -1,5 +1,6 @@
 using System;
 using OpenPSO.Functions;
+using OpenPSO.Lib.Topologies;
 
 namespace OpenPSO.Lib
 {
@@ -13,6 +14,7 @@ namespace OpenPSO.Lib
         public double C1 { get; }
         public double C2 { get; }
 
+        // TODO Makes sense to also have XMin?
         public double XMax { get; }
         public double VMax { get; }
 
@@ -24,6 +26,7 @@ namespace OpenPSO.Lib
         public double InitXMax { get; }
 
         public readonly IFunction function;
+        public readonly int nDims;
 
         public readonly int maxEvals;
 
@@ -36,6 +39,24 @@ namespace OpenPSO.Lib
         public Config()
         {
             Rng = new Random();
+
+            W = 0.729844;
+            C1 = 1.494;
+            C2 = 1.494;
+
+            XMax = 10;
+            VMax = 10;
+            InitXMin = 2.56;
+            InitXMax = 5.12;
+
+            function = new Rastrigin();
+            nDims = 10;
+
+            maxEvals = 980_000;
+            criteria = 100;
+            critKeepGoing = false;
+            topology = new GlobalTopology();
         }
+
     }
 }

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace OpenPSO.Lib
 {
     public class PSO
     {
-
-        private int totalEvals;
 
         private Config cfg;
         private IList<Particle> particles;
@@ -28,10 +27,19 @@ namespace OpenPSO.Lib
         public event Action<PSO> PostIteration;
         public event Action<PSO> PostUpdatePopData;
 
+        public (double fitness, ReadOnlyCollection<double> position)
+            BestSoFar =>
+                (bestSoFar.fitness, Array.AsReadOnly(bestSoFar.position));
+
+        public int TotalEvals { get; private set; }
+
         public PSO(Config cfg)
         {
-            totalEvals = 0;
+            TotalEvals = 0;
             this.cfg = cfg;
+
+            // TODO A configurable update strategy
+            updateStrategy = () => true; // For now, always update
 
             // Initialize list of particles
             particles = new List<Particle>(cfg.PopSize);
@@ -39,11 +47,12 @@ namespace OpenPSO.Lib
             // Initialize individual particles
             for (int i = 0; i < cfg.PopSize; i++)
             {
-                Particle p = new Particle(i, cfg);
+                Particle p = new Particle(i, cfg, n => bestSoFar.position[n]); // TODO This is the global best. Must also allow local best.
                 particles.Add(p);
             }
 
             // TODO Topology
+            cfg.topology.Init(particles);
 
             // Initialize bestSoFar as first particle
             bestSoFar = (particles[0].Fitness,
@@ -54,7 +63,6 @@ namespace OpenPSO.Lib
             // bestCurr = (particles[0].Fitness, particles[0]);
             // worstCurr = (particles[0].Fitness, particles[0]);
 
-            totalEvals = 0;
         }
 
         /// <summary>
@@ -153,7 +161,7 @@ namespace OpenPSO.Lib
 
             }
 
-            totalEvals += evals;
+            TotalEvals += evals;
         }
 
         /// <summary>
@@ -162,8 +170,8 @@ namespace OpenPSO.Lib
         public void Run()
         {
             //int iterations = 0;
-            int evaluations = 0;
-            int critEvals = 0;
+            int critEvals = 0; // TODO This should be instance variable
+            TotalEvals = 0;
 
             // Keep going until maximum number of evaluations is reached
             do
@@ -181,24 +189,21 @@ namespace OpenPSO.Lib
                 // Is the best so far below the stop criteria? If so did we
                 // already saved the number of evaluations required to get below
                 // the stop criteria?
-                if (bestSoFar.fitness < cfg.criteria && critEvals == 0)
+                if (bestSoFar.fitness < cfg.criteria && critEvals == 0) // TODO Improve this for seeking max instead of min
                 {
-                    // TODO Best so far not being updated anywhere
-                    // TODO Improve this for seeking max instead of min
-
                     // Keep the number of evaluations which attained the stop
                     // criteria
-                    critEvals = evaluations;
+                    critEvals = TotalEvals;
 
                     // Stop current run if I'm not supposed to keep going
-                    if (cfg.critKeepGoing) break;
+                    if (!cfg.critKeepGoing) break;
 
                 }
 
                 // Call end-of-iteration events
                 PostIteration?.Invoke(this);
 
-            } while (evaluations < cfg.maxEvals);
+            } while (TotalEvals < cfg.maxEvals);
         }
 
     }

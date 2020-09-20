@@ -6,7 +6,7 @@ namespace OpenPSO.Lib.Topologies
     public class GlobalTopology : ITopology
     {
         private IEnumerable<Particle> particles;
-        public int PopSize { get; }
+        public int PopSize { get; } = 50;
 
         public void Init(IEnumerable<Particle> particles)
         {
