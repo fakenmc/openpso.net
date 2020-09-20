@@ -43,7 +43,7 @@ namespace OpenPSO.Lib
 
         public ReadOnlyCollection<double> Position => Array.AsReadOnly(position);
 
-        public IEnumerable<Particle> Neighbors => null; // TODO Connect this to ITopology
+        public IEnumerable<Particle> Neighbors => cfg.topology.GetNeighbors(id);
 
         public double BestFitnessSoFar => bestFitnessSoFar;
 

@@ -34,10 +34,10 @@ namespace OpenPSO.Lib
             this.cfg = cfg;
 
             // Initialize list of particles
-            particles = new List<Particle>(cfg.InitPopSize);
+            particles = new List<Particle>(cfg.PopSize);
 
             // Initialize individual particles
-            for (int i = 0; i < cfg.InitPopSize; i++)
+            for (int i = 0; i < cfg.PopSize; i++)
             {
                 Particle p = new Particle(i, cfg);
                 particles.Add(p);

@@ -15,7 +15,7 @@ namespace OpenPSO.Lib
         public double XMax { get; }
         public double VMax { get; }
 
-        public int InitPopSize { get; } // TODO Should this be associated with topology instead?
+        public int PopSize => topology.PopSize;
 
         public Random Rng { get; }
 
@@ -29,6 +29,8 @@ namespace OpenPSO.Lib
         public readonly double criteria;
 
         public readonly bool critKeepGoing;
+
+        public readonly ITopology topology;
 
         public Config()
         {
