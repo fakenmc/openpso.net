@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Functions
+﻿namespace OpenPSO.Functions
 {
     public class Class1
     {

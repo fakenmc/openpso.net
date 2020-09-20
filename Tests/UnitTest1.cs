@@ -1,7 +1,6 @@
-using System;
 using Xunit;
 
-namespace tests
+namespace OpenPSO.Tests
 {
     public class UnitTest1
     {

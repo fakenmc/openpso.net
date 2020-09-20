@@ -1,4 +1,4 @@
-namespace OpenPSO.Lib
+namespace OpenPSO.Functions
 {
     public interface IFunction
     {

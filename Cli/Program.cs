@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace cli
+namespace OpenPSO.Cli
 {
     class Program
     {
