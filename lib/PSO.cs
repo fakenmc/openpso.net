@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+
 namespace OpenPSO.Lib
 {
     public class PSO
@@ -8,7 +10,7 @@ namespace OpenPSO.Lib
         private int totalEvals = 0;
 
         private Config cfg;
-        private Particle[] particles;
+        private IList<Particle> particles;
 
         // Best fitness, position and particle ID so far
         private (double fitness, double[] position, Particle particle) bestSoFar;
@@ -30,6 +32,19 @@ namespace OpenPSO.Lib
         {
             totalEvals = 0;
             this.cfg = cfg;
+
+            // Initialize list of particles
+            particles = new List<Particle>(cfg.InitPopSize);
+
+            // Initialize individual particles
+            for (int i = 0; i < cfg.InitPopSize; i++)
+            {
+                Particle p = new Particle(i, cfg);
+                particles.Add(p);
+            }
+
+            // TODO Topology
+
         }
 
         /// <summary>
@@ -79,7 +94,7 @@ namespace OpenPSO.Lib
             }
 
             // Determine average fitness in the population
-            avgFitCurr = sumFitness / particles.Length;
+            avgFitCurr = sumFitness / particles.Count;
 
             // Call post-update population data events
             PostUpdatePopData?.Invoke(this);

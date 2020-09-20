@@ -15,9 +15,12 @@ namespace OpenPSO.Lib
         public double XMax { get; }
         public double VMax { get; }
 
-        // public int PopSize { get; }
+        public int InitPopSize { get; } // TODO Should this be associated with topology instead?
 
         public Random Rng { get; }
+
+        public double InitXMin { get; }
+        public double InitXMax { get; }
 
         public readonly IFunction function;
 

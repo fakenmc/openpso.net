@@ -57,6 +57,12 @@ namespace OpenPSO.Lib
             this.id = id;
             this.cfg = cfg;
             nDim = position.Length;
+
+            for (int i = 0; i < nDim; i++)
+            {
+                // TODO What if [xMin, xMax] is different for different dimensions?
+                position[i] = cfg.Rng.NextDouble(cfg.InitXMin, cfg.InitXMax);
+            }
         }
 
         public void UpdateBestNeighbor(Particle neighbor)
