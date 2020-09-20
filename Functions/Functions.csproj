@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>OpenPSO.Lib</AssemblyName>
+    <AssemblyName>OpenPSO.Functions</AssemblyName>
+    <RootNamespace>OpenPSO.Functions</RootNamespace>
   </PropertyGroup>
 
 </Project>

@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>OpenPSO.Tests</AssemblyName>
+    <RootNamespace>OpenPSO.Tests</RootNamespace>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
