@@ -9,7 +9,6 @@ namespace OpenPSO.Lib
         private Config cfg;
 
         //void* neigh_info;
-        private int id;
         private double fitness;
 
         // Best fitness this particle ever had so far
@@ -38,6 +37,12 @@ namespace OpenPSO.Lib
         // public IList<double> Position => position;
         // public IList<double> Velocity => velocity;
 
+        public readonly int id;
+
+        public double Fitness =>  fitness;
+
+        public ReadOnlyCollection<double> Position => Array.AsReadOnly(position);
+
         public IEnumerable<Particle> Neighbors => null; // TODO Connect this to ITopology
 
         public double BestFitnessSoFar => bestFitnessSoFar;
@@ -47,13 +52,14 @@ namespace OpenPSO.Lib
         //    Array.AsReadOnly(neighsBestPositionSoFar);
 
 
-        public Particle(Config cfg)
+        public Particle(int id, Config cfg)
         {
+            this.id = id;
             this.cfg = cfg;
             nDim = position.Length;
         }
 
-        public void UpdateBest(Particle neighbor)
+        public void UpdateBestNeighbor(Particle neighbor)
         {
             neighsBestFitnessSoFar = neighbor.BestFitnessSoFar;
             Array.Copy(
@@ -96,6 +102,23 @@ namespace OpenPSO.Lib
             fitness = cfg.function.Evaluate(position);
 
             // TODO Post-evaluation hooks, e.g. watershed
+        }
+
+        public void UpdateBestSoFar()
+        {
+            // Update knowledge of best fitness/position so far
+            if (fitness < bestFitnessSoFar) // TODO Improve this for seeking max instead of min
+            {
+                bestFitnessSoFar = fitness;
+                Array.Copy(position, bestPositionSoFar, nDim);
+            }
+
+            // Update knowledge of best neighbor so far if I am the best neighbor
+            if (fitness < neighsBestFitnessSoFar) // TODO Improve this for seeking max instead of min
+            {
+                neighsBestFitnessSoFar = fitness;
+                Array.Copy(position, neighsBestPositionSoFar, nDim);
+            }
         }
     }
 }
