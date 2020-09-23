@@ -39,7 +39,7 @@ namespace OpenPSO.Lib
 
         public readonly int id;
 
-        public double Fitness =>  fitness;
+        public double Fitness => fitness;
 
         public ReadOnlyCollection<double> Position => Array.AsReadOnly(position);
 
@@ -111,6 +111,15 @@ namespace OpenPSO.Lib
 
         public void Update()
         {
+            if (id == 45)
+            {
+                Console.Write("\tVel=(");
+                foreach (double v in velocity) Console.Write($"{v:f3}, ");
+                Console.WriteLine($") => VMax={pso.VMax(pso):f3}");
+                Console.Write("\tPos=(");
+                foreach (double p in position) Console.Write($"{p:f3}, ");
+                Console.WriteLine($") => XMin,XMax={pso.XMin(pso):f3}, {pso.XMax(pso):f3}");
+            }
             for (int i = 0; i < nDim; i++)
             {
                 // Update velocity
