@@ -22,7 +22,7 @@ namespace OpenPSO.Cli
                 5.12,          // Initial xMax
                 new Rastrigin(),  // Function
                 10,            // Number of dimensions in function
-                980,       // Max. evaluations
+                980_000,       // Max. evaluations
                 10,            // Criterion
                 false,         // Keep going after criteria's been met?
                 new VonNeumannGridTopology(7, 7) //new GlobalTopology(50)  // Topology

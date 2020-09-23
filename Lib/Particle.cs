@@ -24,7 +24,7 @@ namespace OpenPSO.Lib
         private double[] position;
         private double[] velocity;
 
-        private Func<double> groupBest;
+        private Func<int, double> groupBestPosition;
 
         private int nDim;
 
@@ -64,10 +64,10 @@ namespace OpenPSO.Lib
             switch (pso.GrpBest)
             {
                 case GroupBest.Global:
-                    groupBest = () => pso.BestSoFar.fitness;
+                    groupBestPosition = i => pso.BestSoFar.position[i];
                     break;
                 case GroupBest.Local:
-                    groupBest = () => neighsBestFitnessSoFar;
+                    groupBestPosition = i => neighsBestPositionSoFar[i];
                     break;
             }
 
@@ -111,25 +111,16 @@ namespace OpenPSO.Lib
 
         public void Update()
         {
-            if (id == 45)
-            {
-                Console.Write("\tVel=(");
-                foreach (double v in velocity) Console.Write($"{v:f3}, ");
-                Console.WriteLine($") => VMax={pso.VMax(pso):f3}");
-                Console.Write("\tPos=(");
-                foreach (double p in position) Console.Write($"{p:f3}, ");
-                Console.WriteLine($") => XMin,XMax={pso.XMin(pso):f3}, {pso.XMax(pso):f3}");
-            }
             for (int i = 0; i < nDim; i++)
             {
                 // Update velocity
                 velocity[i] = pso.W(pso) * velocity[i]
                     + pso.C1(pso) * pso.Rng.NextDouble() * (bestPositionSoFar[i] - position[i])
-                    + pso.C2(pso) * pso.Rng.NextDouble() * (groupBest() - position[i]);
+                    + pso.C2(pso) * pso.Rng.NextDouble() * (groupBestPosition(i) - position[i]);
 
                 // Keep velocity in bounds
                 if (velocity[i] > pso.VMax(pso)) velocity[i] = pso.VMax(pso);
-                if (velocity[i] < -pso.VMax(pso)) velocity[i] = -pso.VMax(pso);
+                else if (velocity[i] < -pso.VMax(pso)) velocity[i] = -pso.VMax(pso);
 
                 // Update position
                 position[i] = position[i] + velocity[i];
