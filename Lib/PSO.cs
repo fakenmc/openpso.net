@@ -9,7 +9,7 @@ namespace OpenPSO.Lib
     {
 
         private Config cfg;
-        private IList<Particle> particles;
+        private IList<Particle> particles; // TODO Maybe this should belong to topology
 
         // Best fitness, position and particle ID so far
         private (double fitness, double[] position, Particle particle) bestSoFar;
