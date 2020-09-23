@@ -56,6 +56,9 @@ namespace OpenPSO.Lib
         // Average fitness at each iteration
         private double avgFitCurr;
 
+        // Random number generator
+        private Random rng;
+
         // ///////////// //
         // Plugin events //
         // ///////////// //
@@ -67,13 +70,10 @@ namespace OpenPSO.Lib
         // Publicly accessible properties //
         // ////////////////////////////// //
 
-        public (double fitness, ReadOnlyCollection<double> position)
-            BestSoFar =>
-                (bestSoFar.fitness, Array.AsReadOnly(bestSoFar.position));
+        public (double fitness, ReadOnlyCollection<double> position) BestSoFar
+            => (bestSoFar.fitness, Array.AsReadOnly(bestSoFar.position));
 
         public int TotalEvals { get; private set; }
-
-        public Random Rng { get; } // TODO Should change the way we keep the RNG?
 
         // ////////////// //
         // Methods / Code //
@@ -114,6 +114,13 @@ namespace OpenPSO.Lib
             Topology = topology;
 
 
+            // Initialize list of particles
+            Particle[] particles = new Particle[topology.PopSize];
+
+            double[] position = new double[NDims];
+            double[] velocity = new double[NDims];
+
+            // Determine strategy for group best position
             switch (grpBestPosition)
             {
                 case GroupBest.Global:
@@ -124,15 +131,29 @@ namespace OpenPSO.Lib
                     break;
             }
             TotalEvals = 0;
-            Rng = new Random();
-
-            // Initialize list of particles
-            Particle[] particles = new Particle[topology.PopSize];
+            rng = new Random();
 
             // Initialize individual particles
             for (int i = 0; i < topology.PopSize; i++)
             {
-                particles[i] = new Particle(i, this);
+                double fitness;
+
+                for (int j = 0; j < NDims; j++)
+                {
+                    // Initialize position for current variable of current particle
+                    position[j] = rng.NextDouble(InitXMin, InitXMax); // TODO What if [xMin, xMax] is different for different dimensions?
+
+                    // Initialize velocity for current variable of current particle
+                    velocity[j] = rng.NextDouble(XMin(this), XMax(this))
+                        * rng.NextDouble(-0.5, 0.5);
+                }
+
+                // Determine fitness for initial position
+                fitness = Function.Evaluate(position); // TODO Doesn't this count for PSO.TotalEvals?
+
+                particles[i] = new Particle(i, fitness, position, velocity);
+
+                // TODO Hooks such as watershed
             }
 
             // Initialize topology
@@ -199,14 +220,18 @@ namespace OpenPSO.Lib
 
         }
 
+        /// <summary>
+        /// Update position and velocity of a single particle.
+        /// </summary>
+        /// <param name="p">Particle to update.</param>
         public void UpdateParticle(Particle p)
         {
             for (int i = 0; i < NDims; i++)
             {
                 // Update velocity
                 p.Velocity[i] = W(this) * p.Velocity[i]
-                    + C1(this) * Rng.NextDouble() * (p.BestPositionSoFar[i] - p.Position[i])
-                    + C2(this) * Rng.NextDouble() * (GroupBestPosition(p, i) - p.Position[i]);
+                    + C1(this) * rng.NextDouble() * (p.BestPositionSoFar[i] - p.Position[i])
+                    + C2(this) * rng.NextDouble() * (GroupBestPosition(p, i) - p.Position[i]);
 
                 // Keep velocity in bounds
                 if (p.Velocity[i] > VMax(this)) p.Velocity[i] = VMax(this);
