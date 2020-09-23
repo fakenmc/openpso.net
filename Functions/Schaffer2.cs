@@ -2,6 +2,27 @@ using System;
 
 namespace OpenPSO.Functions
 {
+    /// <summary>
+    /// Schaffer function N. 2.
+    /// </summary>
+    /// <remarks>
+    /// Characteristics:
+    ///
+    /// * Two-dimensions only.
+    /// * Search domain: $-100 \leq x,y \leq 100$
+    /// * Minimum: $f(0,0)=0$
+    ///
+    /// Optimization setup suggestions:
+    ///
+    /// * Initialization domain: $15 \leq x, y \leq 30$
+    /// * Stop criterion: 0.00001
+    ///
+    /// References:
+    ///
+    /// * https://peerj.com/articles/cs-202/
+    /// * https://www.sfu.ca/~ssurjano/schaffer2.html
+    /// * https://en.wikipedia.org/wiki/Test_functions_for_optimization
+    /// </remarks>
     public class Schaffer2 : IFunction
     {
         public double Evaluate(double[] position)
