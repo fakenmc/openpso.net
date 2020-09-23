@@ -1,3 +1,5 @@
+using OpenPSO.Lib;
+
 namespace OpenPSO.Functions
 {
     public class HyperEllipsoid : IFunction

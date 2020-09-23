@@ -1,5 +1,7 @@
 ﻿using System;
 using OpenPSO.Lib;
+using OpenPSO.Lib.Topologies;
+using OpenPSO.Functions;
 
 namespace OpenPSO.Cli
 {
@@ -7,8 +9,27 @@ namespace OpenPSO.Cli
     {
         static void Main(string[] args)
         {
-            Config cfg = new Config();
-            PSO pso = new PSO(cfg);
+            PSO pso = new PSO(
+                p => true,     // Update strategy
+                p => 0.729844, // inertia weight
+                p => 1.494,    // c1
+                p => 1.494,    // c2
+                p => -10,      // xMin
+                p => 10,       // xMax
+                p => 10,       // vMax
+                GroupBest.Global, // Local or global best?
+                2.56,          // Initial xMin
+                5.12,          // Initial xMax
+                new Rastrigin(),  // Function
+                10,            // Number of dimensions in function
+                980_000,       // Max. evaluations
+                10,            // Criterion
+                false,         // Keep going after criteria's been met?
+                new GlobalTopology(50));  // Topology
+
+            // new VonNeumannGridTopology(7, 7);
+            // new MooreGridTopology(7, 7);
+
             pso.PostIteration += PrintBestSoFar;
             pso.Run();
         }

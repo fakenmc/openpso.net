@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lib\Lib.csproj" />
+    <ProjectReference Include="..\Functions\Functions.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

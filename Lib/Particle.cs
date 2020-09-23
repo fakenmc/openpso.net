@@ -6,9 +6,9 @@ namespace OpenPSO.Lib
 {
     public class Particle
     {
-        private Config cfg;
 
-        //void* neigh_info;
+        private PSO pso;
+
         private double fitness;
 
         // Best fitness this particle ever had so far
@@ -24,7 +24,7 @@ namespace OpenPSO.Lib
         private double[] position;
         private double[] velocity;
 
-        private Func<int, double> gBest;
+        private Func<double> groupBest;
 
         private int nDim;
 
@@ -43,8 +43,6 @@ namespace OpenPSO.Lib
 
         public ReadOnlyCollection<double> Position => Array.AsReadOnly(position);
 
-        public IEnumerable<Particle> Neighbors => cfg.topology.GetNeighbors(id);
-
         public double BestFitnessSoFar => bestFitnessSoFar;
 
         public double NeighsBestFitnessSoFar => neighsBestFitnessSoFar;
@@ -52,26 +50,35 @@ namespace OpenPSO.Lib
         //    Array.AsReadOnly(neighsBestPositionSoFar);
 
 
-        public Particle(int id, Config cfg, Func<int, double> gBest)
+        public Particle(int id, PSO pso)
         {
             this.id = id;
-            this.cfg = cfg;
-            this.gBest = gBest;
-            nDim = cfg.nDims;
+            this.pso = pso;
+            nDim = pso.NDims;
 
             position = new double[nDim];
             velocity = new double[nDim];
             bestPositionSoFar = new double[nDim];
             neighsBestPositionSoFar = new double[nDim];
 
+            switch (pso.GrpBest)
+            {
+                case GroupBest.Global:
+                    groupBest = () => pso.BestSoFar.fitness;
+                    break;
+                case GroupBest.Local:
+                    groupBest = () => neighsBestFitnessSoFar;
+                    break;
+            }
+
             for (int i = 0; i < nDim; i++)
             {
                 // Initialize position for current variable of current particle
-                position[i] = cfg.Rng.NextDouble(cfg.InitXMin, cfg.InitXMax); // TODO What if [xMin, xMax] is different for different dimensions?
+                position[i] = pso.Rng.NextDouble(pso.InitXMin, pso.InitXMax); // TODO What if [xMin, xMax] is different for different dimensions?
 
                 // Initialize velocity for current variable of current particle
-                velocity[i] = cfg.Rng.NextDouble(-cfg.XMax, cfg.XMax)
-                    * cfg.Rng.NextDouble(-0.5, 0.5);
+                velocity[i] = pso.Rng.NextDouble(pso.XMin(pso), pso.XMax(pso))
+                    * pso.Rng.NextDouble(-0.5, 0.5);
             }
 
             // Set best position so far as current position
@@ -81,7 +88,7 @@ namespace OpenPSO.Lib
             Array.Copy(position, neighsBestPositionSoFar, nDim);
 
             // Determine fitness for initial position
-            fitness = cfg.function.Evaluate(position); // TODO Doesn't this count for PSO.TotalEvals?
+            fitness = pso.Function.Evaluate(position); // TODO Doesn't this count for PSO.TotalEvals?
 
             // TODO Hooks such as watershed
 
@@ -107,32 +114,32 @@ namespace OpenPSO.Lib
             for (int i = 0; i < nDim; i++)
             {
                 // Update velocity
-                velocity[i] = cfg.W * velocity[i]
-                    + cfg.C1 * cfg.Rng.NextDouble() * (bestPositionSoFar[i] - position[i])
-                    + cfg.C2 * cfg.Rng.NextDouble() * (gBest(i) - position[i]);
+                velocity[i] = pso.W(pso) * velocity[i]
+                    + pso.C1(pso) * pso.Rng.NextDouble() * (bestPositionSoFar[i] - position[i])
+                    + pso.C2(pso) * pso.Rng.NextDouble() * (groupBest() - position[i]);
 
                 // Keep velocity in bounds
-                if (velocity[i] > cfg.VMax) velocity[i] = cfg.VMax;
-                if (velocity[i] < -cfg.VMax) velocity[i] = -cfg.VMax;
+                if (velocity[i] > pso.VMax(pso)) velocity[i] = pso.VMax(pso);
+                if (velocity[i] < -pso.VMax(pso)) velocity[i] = -pso.VMax(pso);
 
                 // Update position
                 position[i] = position[i] + velocity[i];
 
                 // Keep position in bounds, stop particle if necessary
-                if (position[i] > cfg.XMax)
+                if (position[i] > pso.XMax(pso))
                 {
-                    position[i] = cfg.XMax;
+                    position[i] = pso.XMax(pso);
                     velocity[i] = 0;
                 }
-                else if (position[i] < -cfg.XMax)
+                else if (position[i] < pso.XMin(pso))
                 {
-                    position[i] = -cfg.XMax;
+                    position[i] = pso.XMin(pso);
                     velocity[i] = 0;
                 }
             }
 
             // Obtain particle fitness for new position
-            fitness = cfg.function.Evaluate(position);
+            fitness = pso.Function.Evaluate(position);
 
             // TODO Post-evaluation hooks, e.g. watershed
         }

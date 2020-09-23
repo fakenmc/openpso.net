@@ -66,12 +66,12 @@ namespace OpenPSO.Lib.Topologies
             }
         }
 
-        public IEnumerable<Particle> GetNeighbors(int pid)
+        public IEnumerable<Particle> GetNeighbors(Particle p)
         {
-            if (pid >= PopSize)
+            if (p.id >= PopSize)
                 throw new ArgumentOutOfRangeException("Invalid particle ID");
-            int xPos = pid % XSize;
-            int yPos = pid / XSize;
+            int xPos = p.id % XSize;
+            int yPos = p.id / XSize;
 
             foreach ((int x, int y) relNeigh in GetRelativeNeighbors())
             {

@@ -41,16 +41,16 @@ namespace OpenPSO.Lib.Topologies
             Particles = particles;
         }
 
-        public IEnumerable<Particle> GetNeighbors(int pid)
+        public IEnumerable<Particle> GetNeighbors(Particle p)
         {
             if (Particles is null)
                 throw new InvalidOperationException("Topology not initialized");
-            if (pid >= popSize)
+            if (p.id >= popSize)
                 throw new ArgumentOutOfRangeException("Invalid particle ID");
 
-            foreach (Particle p in Particles)
+            foreach (Particle pNeigh in Particles)
             {
-                if (p.id != pid) yield return p;
+                yield return pNeigh;
             }
         }
     }

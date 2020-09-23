@@ -8,7 +8,7 @@ namespace OpenPSO.Lib
         IEnumerable<Particle> Particles { get; }
 
         void Init(IEnumerable<Particle> particles);
-        IEnumerable<Particle> GetNeighbors(int pid);
+        IEnumerable<Particle> GetNeighbors(Particle p);
 
 
     }

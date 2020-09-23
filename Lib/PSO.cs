@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace OpenPSO.Lib
@@ -8,7 +7,42 @@ namespace OpenPSO.Lib
     public class PSO
     {
 
-        private Config cfg;
+        // //////////////////////////// //
+        // Required configurable fields //
+        // //////////////////////////// //
+        public Func<PSO, bool> UpdateStrategy { get; }
+
+        // Inertia weight
+        public Func<PSO, double> W { get; }
+
+        // Acceleration coefficients, used to tune the relative influence of
+        // each term of the formula
+        public Func<PSO, double> C1 { get; }
+        public Func<PSO, double> C2 { get; }
+
+        public Func<PSO, double> XMin { get; }
+        public Func<PSO, double> XMax { get; }
+        public Func<PSO, double> VMax { get; }
+
+        public GroupBest GrpBest { get; }
+        public double InitXMin { get; }
+        public double InitXMax { get; }
+
+        public IFunction Function { get; }
+        public int NDims { get; }
+
+        public int MaxEvals { get; }
+
+        public double Criteria { get; }
+
+        public bool CritKeepGoing { get; }
+
+        public ITopology Topology { get; }
+
+
+        // /////////////////////////////////////// //
+        // Private fields which change at run time //
+        // /////////////////////////////////////// //
 
         // Best fitness, position and particle ID so far
         private (double fitness, double[] position, Particle particle) bestSoFar;
@@ -21,10 +55,16 @@ namespace OpenPSO.Lib
         // Average fitness at each iteration
         private double avgFitCurr;
 
-        private Func<bool> updateStrategy;
+        // ///////////// //
+        // Plugin events //
+        // ///////////// //
 
         public event Action<PSO> PostIteration;
         public event Action<PSO> PostUpdatePopData;
+
+        // ////////////////////////////// //
+        // Publicly accessible properties //
+        // ////////////////////////////// //
 
         public (double fitness, ReadOnlyCollection<double> position)
             BestSoFar =>
@@ -32,26 +72,61 @@ namespace OpenPSO.Lib
 
         public int TotalEvals { get; private set; }
 
-        public PSO(Config cfg)
+        public Random Rng { get; } // TODO Should change the way we keep the RNG?
+
+        // ////////////// //
+        // Methods / Code //
+        // ////////////// //
+
+        public PSO(
+            Func<PSO, bool> updateStrategy,
+            Func<PSO, double> w,
+            Func<PSO, double> c1,
+            Func<PSO, double> c2,
+            Func<PSO, double> xMin,
+            Func<PSO, double> xMax,
+            Func<PSO, double> vMax,
+            GroupBest grpBest,
+            double initXMin,
+            double initXMax,
+            IFunction function,
+            int nDims,
+            int maxEvals,
+            double criteria,
+            bool critKeepGoing,
+            ITopology topology)
         {
+            UpdateStrategy = updateStrategy;
+            W = w;
+            C1 = c1;
+            C2 = c2;
+            XMin = xMin;
+            XMax = xMax;
+            VMax = vMax;
+            GrpBest = grpBest;
+            InitXMin = initXMin;
+            InitXMax = initXMax;
+            Function = function;
+            NDims = nDims;
+            MaxEvals = maxEvals;
+            Criteria = criteria;
+            CritKeepGoing = critKeepGoing;
+            Topology = topology;
+
             TotalEvals = 0;
-            this.cfg = cfg;
+            Rng = new Random();
 
             // Initialize list of particles
-            Particle[] particles = new Particle[cfg.PopSize];
-
-            // TODO A configurable update strategy
-            updateStrategy = () => true; // For now, always update
+            Particle[] particles = new Particle[topology.PopSize];
 
             // Initialize individual particles
-            for (int i = 0; i < cfg.PopSize; i++)
+            for (int i = 0; i < topology.PopSize; i++)
             {
-                // TODO This is the global best. Must also allow local best.
-                particles[i] = new Particle(i, cfg, n => bestSoFar.position[n]);
+                particles[i] = new Particle(i, this);
             }
 
-            // TODO Topology
-            cfg.topology.Init(particles);
+            // Initialize topology
+            topology.Init(particles);
 
             // Initialize bestSoFar as first particle
             bestSoFar = (particles[0].Fitness,
@@ -79,7 +154,7 @@ namespace OpenPSO.Lib
             Particle pBest = null;
             Particle pWorst = null;
 
-            foreach (Particle p in cfg.topology.Particles)
+            foreach (Particle p in Topology.Particles)
             {
                 // Update worst in population
                 if (p.Fitness > (pWorst?.Fitness ?? float.NegativeInfinity)) // TODO Improve this for seeking max instead of min
@@ -113,7 +188,7 @@ namespace OpenPSO.Lib
             }
 
             // Determine average fitness in the population
-            avgFitCurr = sumFitness / cfg.topology.PopSize;
+            avgFitCurr = sumFitness / Topology.PopSize;
 
             // Call post-update population data events
             PostUpdatePopData?.Invoke(this);
@@ -132,12 +207,12 @@ namespace OpenPSO.Lib
             int evals = 0;
 
             // Cycle through particles
-            foreach (Particle pCurr in cfg.topology.Particles)
+            foreach (Particle pCurr in Topology.Particles)
             {
                 // TODO Update or not to update according to SS-PSO
 
                 // Cycle through neighbors
-                foreach (Particle pNeigh in pCurr.Neighbors)
+                foreach (Particle pNeigh in Topology.GetNeighbors(pCurr))
                 {
                     // TODO If a neighbor particle is the worst particle, mark current particle for updating (SS-PSO only)
 
@@ -154,7 +229,7 @@ namespace OpenPSO.Lib
                 // In practice this should be a part of pCurr.Neighbors strategy
 
                 // Update current particle?
-                if (updateStrategy()) // TODO Connect this with SS-PSO
+                if (UpdateStrategy(this)) // TODO Connect this with SS-PSO
                 {
                     pCurr.Update();
                     evals++;
@@ -193,18 +268,18 @@ namespace OpenPSO.Lib
                 // Is the best so far below the stop criteria? If so did we
                 // already saved the number of evaluations required to get below
                 // the stop criteria?
-                if (bestSoFar.fitness < cfg.criteria && critEvals == 0) // TODO Improve this for seeking max instead of min
+                if (bestSoFar.fitness < Criteria && critEvals == 0) // TODO Improve this for seeking max instead of min
                 {
                     // Keep the number of evaluations which attained the stop
                     // criteria
                     critEvals = TotalEvals;
 
                     // Stop current run if I'm not supposed to keep going
-                    if (!cfg.critKeepGoing) break;
+                    if (!CritKeepGoing) break;
 
                 }
 
-            } while (TotalEvals < cfg.maxEvals);
+            } while (TotalEvals < MaxEvals);
         }
 
     }
