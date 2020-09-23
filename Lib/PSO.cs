@@ -9,7 +9,6 @@ namespace OpenPSO.Lib
     {
 
         private Config cfg;
-        private IList<Particle> particles; // TODO Maybe this should belong to topology
 
         // Best fitness, position and particle ID so far
         private (double fitness, double[] position, Particle particle) bestSoFar;
@@ -38,17 +37,17 @@ namespace OpenPSO.Lib
             TotalEvals = 0;
             this.cfg = cfg;
 
+            // Initialize list of particles
+            Particle[] particles = new Particle[cfg.PopSize];
+
             // TODO A configurable update strategy
             updateStrategy = () => true; // For now, always update
-
-            // Initialize list of particles
-            particles = new List<Particle>(cfg.PopSize);
 
             // Initialize individual particles
             for (int i = 0; i < cfg.PopSize; i++)
             {
-                Particle p = new Particle(i, cfg, n => bestSoFar.position[n]); // TODO This is the global best. Must also allow local best.
-                particles.Add(p);
+                // TODO This is the global best. Must also allow local best.
+                particles[i] = new Particle(i, cfg, n => bestSoFar.position[n]);
             }
 
             // TODO Topology
@@ -77,16 +76,18 @@ namespace OpenPSO.Lib
         public void UpdatePopData()
         {
             double sumFitness = 0;
-            Particle pBest = particles[0];
-            Particle pWorst = particles[0];
+            Particle pBest = null;
+            Particle pWorst = null;
 
-            foreach (Particle p in particles)
+            foreach (Particle p in cfg.topology.Particles)
             {
                 // Update worst in population
-                if (p.Fitness > pWorst.Fitness) pWorst = p; // TODO Improve this for seeking max instead of min
+                if (p.Fitness > (pWorst?.Fitness ?? float.NegativeInfinity)) // TODO Improve this for seeking max instead of min
+                    pWorst = p;
 
                 // Update best in population
-                if (p.Fitness < pBest.Fitness) pBest = p; // TODO Improve this for seeking max instead of min
+                if (p.Fitness < (pBest?.Fitness ?? float.PositiveInfinity)) // TODO Improve this for seeking max instead of min
+                    pBest = p;
 
                 // Ask particle to update knowledge of best fitnesses/positions
                 // so far
@@ -112,7 +113,7 @@ namespace OpenPSO.Lib
             }
 
             // Determine average fitness in the population
-            avgFitCurr = sumFitness / particles.Count;
+            avgFitCurr = sumFitness / cfg.topology.PopSize;
 
             // Call post-update population data events
             PostUpdatePopData?.Invoke(this);
@@ -131,7 +132,7 @@ namespace OpenPSO.Lib
             int evals = 0;
 
             // Cycle through particles
-            foreach (Particle pCurr in particles)
+            foreach (Particle pCurr in cfg.topology.Particles)
             {
                 // TODO Update or not to update according to SS-PSO
 

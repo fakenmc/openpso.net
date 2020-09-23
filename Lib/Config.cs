@@ -57,8 +57,8 @@ namespace OpenPSO.Lib
             critKeepGoing = false;
 
             //topology = new VonNeumannGridTopology(7, 7);
-            topology = new MooreGridTopology(7, 7);
-            //topology = new GlobalTopology(50);
+            //topology = new MooreGridTopology(7, 7);
+            topology = new GlobalTopology(50);
         }
 
     }

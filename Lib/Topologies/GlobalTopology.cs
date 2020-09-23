@@ -21,7 +21,7 @@ namespace OpenPSO.Lib.Topologies
             }
         }
 
-        private IEnumerable<Particle> particles;
+        public IEnumerable<Particle> Particles { get; private set; }
 
         public GlobalTopology(int popSize)
         {
@@ -38,17 +38,17 @@ namespace OpenPSO.Lib.Topologies
         {
             if ((particles?.Count() ?? 0) != popSize)
                 throw new ArgumentException("Invalid number of particles");
-            this.particles = particles;
+            Particles = particles;
         }
 
         public IEnumerable<Particle> GetNeighbors(int pid)
         {
-            if (particles is null)
+            if (Particles is null)
                 throw new InvalidOperationException("Topology not initialized");
             if (pid >= popSize)
                 throw new ArgumentOutOfRangeException("Invalid particle ID");
 
-            foreach (Particle p in particles)
+            foreach (Particle p in Particles)
             {
                 if (p.id != pid) yield return p;
             }

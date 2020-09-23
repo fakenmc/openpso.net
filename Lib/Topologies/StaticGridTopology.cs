@@ -14,6 +14,20 @@ namespace OpenPSO.Lib.Topologies
 
         public int PopSize => XSize * YSize;
 
+        public IEnumerable<Particle> Particles
+        {
+            get
+            {
+                for (int y = 0; y < YSize; y++)
+                {
+                    for (int x = 0; x < XSize; x++)
+                    {
+                        yield return particles[x, y];
+                    }
+                }
+            }
+        }
+
         private Particle[,] particles;
 
         public StaticGridTopology(int xSize, int ySize)
