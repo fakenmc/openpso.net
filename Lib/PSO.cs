@@ -87,7 +87,7 @@ namespace OpenPSO.Lib
             Func<PSO, double> xMin,
             Func<PSO, double> xMax,
             Func<PSO, double> vMax,
-            GroupBest grpBestPosition,
+            GroupBestPosition grpBestPosition,
             double initXMin,
             double initXMax,
             IFunction function,
@@ -123,10 +123,10 @@ namespace OpenPSO.Lib
             // Determine strategy for group best position
             switch (grpBestPosition)
             {
-                case GroupBest.Global:
+                case Lib.GroupBestPosition.Global:
                     GroupBestPosition = (p, i) => BestSoFar.position[i];
                     break;
-                case GroupBest.Local:
+                case Lib.GroupBestPosition.Local:
                     GroupBestPosition = (p, i) => p.NeighsBestPositionSoFar[i];
                     break;
             }

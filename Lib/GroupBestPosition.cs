@@ -1,6 +1,6 @@
 namespace OpenPSO.Lib
 {
-    public enum GroupBest
+    public enum GroupBestPosition
     {
         Local,
         Global

@@ -17,7 +17,7 @@ namespace OpenPSO.Cli
                 p => -10,      // xMin
                 p => 10,       // xMax
                 p => 10,       // vMax
-                GroupBest.Global, // Local or global best?
+                GroupBestPosition.Local, // Local or global best?
                 2.56,          // Initial xMin
                 5.12,          // Initial xMax
                 new Rastrigin(),  // Function
