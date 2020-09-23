@@ -1,75 +1,50 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace OpenPSO.Lib
 {
     public class Particle
     {
 
-        private PSO pso;
+        private readonly int nDim;
 
-        private double fitness;
-
-        // Best fitness this particle ever had so far
-        private double bestFitnessSoFar;
         // Best position so far for this particle
-        private double[] bestPositionSoFar;
+        private readonly double[] bestPositionSoFar;
 
-        // Best fitness ever known by neighbors
-        private double neighsBestFitnessSoFar;
+        private readonly double[] neighsBestPositionSoFar;
 
-        private double[] neighsBestPositionSoFar;
-
-        private double[] position;
-        private double[] velocity;
-
-        private Func<int, double> groupBestPosition;
-
-        private int nDim;
-
-        // // Best position so far for this particle
-        // public double PBest(int i) => pBest[i];
-
-        // // Best global/local position so far
-        // public double GBest(int i) => gBest(i);
-
-        // public IList<double> Position => position;
-        // public IList<double> Velocity => velocity;
+        private readonly double[] position;
+        private readonly double[] velocity;
 
         public readonly int id;
 
-        public double Fitness => fitness;
+        // Best position so far for this particle
+        public IList<double> BestPositionSoFar =>  bestPositionSoFar;
 
-        public ReadOnlyCollection<double> Position => Array.AsReadOnly(position);
+        public IList<double> NeighsBestPositionSoFar => neighsBestPositionSoFar;
 
-        public double BestFitnessSoFar => bestFitnessSoFar;
+        public IList<double> Position => position;
+        public IList<double> Velocity => velocity;
 
-        public double NeighsBestFitnessSoFar => neighsBestFitnessSoFar;
-        //public ReadOnlyCollection<double> NeighsBestPositionSoFar =>
-        //    Array.AsReadOnly(neighsBestPositionSoFar);
+        // Current fitness
+        public double Fitness { get; set; }
+
+        // Best fitness this particle ever had so far
+        public double BestFitnessSoFar { get; private set; }
+
+        // Best fitness ever known by neighbors
+        public double NeighsBestFitnessSoFar { get; private set; }
 
 
         public Particle(int id, PSO pso)
         {
             this.id = id;
-            this.pso = pso;
             nDim = pso.NDims;
 
             position = new double[nDim];
             velocity = new double[nDim];
             bestPositionSoFar = new double[nDim];
             neighsBestPositionSoFar = new double[nDim];
-
-            switch (pso.GrpBest)
-            {
-                case GroupBest.Global:
-                    groupBestPosition = i => pso.BestSoFar.position[i];
-                    break;
-                case GroupBest.Local:
-                    groupBestPosition = i => neighsBestPositionSoFar[i];
-                    break;
-            }
 
             for (int i = 0; i < nDim; i++)
             {
@@ -88,75 +63,39 @@ namespace OpenPSO.Lib
             Array.Copy(position, neighsBestPositionSoFar, nDim);
 
             // Determine fitness for initial position
-            fitness = pso.Function.Evaluate(position); // TODO Doesn't this count for PSO.TotalEvals?
+            Fitness = pso.Function.Evaluate(position); // TODO Doesn't this count for PSO.TotalEvals?
 
             // TODO Hooks such as watershed
 
             // Set my own fitness as best fitness so far
-            bestFitnessSoFar = fitness;
+            BestFitnessSoFar = Fitness;
 
             // Set me as the best neighbor so far
-            neighsBestFitnessSoFar = fitness;
+            NeighsBestFitnessSoFar = Fitness;
         }
 
         public void UpdateBestNeighbor(Particle neighbor)
         {
-            neighsBestFitnessSoFar = neighbor.BestFitnessSoFar;
+            NeighsBestFitnessSoFar = neighbor.BestFitnessSoFar;
             Array.Copy(
                 neighbor.bestPositionSoFar, // Source
                 neighsBestPositionSoFar,    // Destination
                 nDim);
         }
 
-
-        public void Update()
-        {
-            for (int i = 0; i < nDim; i++)
-            {
-                // Update velocity
-                velocity[i] = pso.W(pso) * velocity[i]
-                    + pso.C1(pso) * pso.Rng.NextDouble() * (bestPositionSoFar[i] - position[i])
-                    + pso.C2(pso) * pso.Rng.NextDouble() * (groupBestPosition(i) - position[i]);
-
-                // Keep velocity in bounds
-                if (velocity[i] > pso.VMax(pso)) velocity[i] = pso.VMax(pso);
-                else if (velocity[i] < -pso.VMax(pso)) velocity[i] = -pso.VMax(pso);
-
-                // Update position
-                position[i] = position[i] + velocity[i];
-
-                // Keep position in bounds, stop particle if necessary
-                if (position[i] > pso.XMax(pso))
-                {
-                    position[i] = pso.XMax(pso);
-                    velocity[i] = 0;
-                }
-                else if (position[i] < pso.XMin(pso))
-                {
-                    position[i] = pso.XMin(pso);
-                    velocity[i] = 0;
-                }
-            }
-
-            // Obtain particle fitness for new position
-            fitness = pso.Function.Evaluate(position);
-
-            // TODO Post-evaluation hooks, e.g. watershed
-        }
-
         public void UpdateBestSoFar()
         {
             // Update knowledge of best fitness/position so far
-            if (fitness < bestFitnessSoFar) // TODO Improve this for seeking max instead of min
+            if (Fitness < BestFitnessSoFar) // TODO Improve this for seeking max instead of min
             {
-                bestFitnessSoFar = fitness;
+                BestFitnessSoFar = Fitness;
                 Array.Copy(position, bestPositionSoFar, nDim);
             }
 
             // Update knowledge of best neighbor so far if I am the best neighbor
-            if (fitness < neighsBestFitnessSoFar) // TODO Improve this for seeking max instead of min
+            if (Fitness < NeighsBestFitnessSoFar) // TODO Improve this for seeking max instead of min
             {
-                neighsBestFitnessSoFar = fitness;
+                NeighsBestFitnessSoFar = Fitness;
                 Array.Copy(position, neighsBestPositionSoFar, nDim);
             }
         }

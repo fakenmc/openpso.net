@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using OpenPSO.Lib;
 
 namespace OpenPSO.Functions
@@ -25,12 +26,12 @@ namespace OpenPSO.Functions
     /// </remarks>
     public class Griewank : IFunction
     {
-        public double Evaluate(double[] position)
+        public double Evaluate(IList<double> position)
         {
             double fit1 = 0.0;
             double fit2 = 1.0;
 
-            for (int i = 0; i < position.Length; i++)
+            for (int i = 0; i < position.Count; i++)
             {
                 fit1 += position[i] * position[i];
                 fit2 *= Math.Cos(position[i] / Math.Sqrt(i + 1.0));

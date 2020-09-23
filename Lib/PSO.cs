@@ -24,7 +24,8 @@ namespace OpenPSO.Lib
         public Func<PSO, double> XMax { get; }
         public Func<PSO, double> VMax { get; }
 
-        public GroupBest GrpBest { get; }
+        public Func<Particle, int, double> GroupBestPosition { get; }
+
         public double InitXMin { get; }
         public double InitXMax { get; }
 
@@ -86,7 +87,7 @@ namespace OpenPSO.Lib
             Func<PSO, double> xMin,
             Func<PSO, double> xMax,
             Func<PSO, double> vMax,
-            GroupBest grpBest,
+            GroupBest grpBestPosition,
             double initXMin,
             double initXMax,
             IFunction function,
@@ -103,7 +104,6 @@ namespace OpenPSO.Lib
             XMin = xMin;
             XMax = xMax;
             VMax = vMax;
-            GrpBest = grpBest;
             InitXMin = initXMin;
             InitXMax = initXMax;
             Function = function;
@@ -113,6 +113,16 @@ namespace OpenPSO.Lib
             CritKeepGoing = critKeepGoing;
             Topology = topology;
 
+
+            switch (grpBestPosition)
+            {
+                case GroupBest.Global:
+                    GroupBestPosition = (p, i) => BestSoFar.position[i];
+                    break;
+                case GroupBest.Local:
+                    GroupBestPosition = (p, i) => p.NeighsBestPositionSoFar[i];
+                    break;
+            }
             TotalEvals = 0;
             Rng = new Random();
 
@@ -131,12 +141,6 @@ namespace OpenPSO.Lib
             // Initialize bestSoFar as first particle
             bestSoFar = (particles[0].Fitness,
                 particles[0].Position.ToArray(), particles[0]);
-
-            // TODO This is probably not required here, since we're doing it
-            // in UpdatePopData()
-            // bestCurr = (particles[0].Fitness, particles[0]);
-            // worstCurr = (particles[0].Fitness, particles[0]);
-
         }
 
         /// <summary>
@@ -195,6 +199,41 @@ namespace OpenPSO.Lib
 
         }
 
+        public void UpdateParticle(Particle p)
+        {
+            for (int i = 0; i < NDims; i++)
+            {
+                // Update velocity
+                p.Velocity[i] = W(this) * p.Velocity[i]
+                    + C1(this) * Rng.NextDouble() * (p.BestPositionSoFar[i] - p.Position[i])
+                    + C2(this) * Rng.NextDouble() * (GroupBestPosition(p, i) - p.Position[i]);
+
+                // Keep velocity in bounds
+                if (p.Velocity[i] > VMax(this)) p.Velocity[i] = VMax(this);
+                else if (p.Velocity[i] < -VMax(this)) p.Velocity[i] = -VMax(this);
+
+                // Update position
+                p.Position[i] = p.Position[i] + p.Velocity[i];
+
+                // Keep position in bounds, stop particle if necessary
+                if (p.Position[i] > XMax(this))
+                {
+                    p.Position[i] = XMax(this);
+                    p.Velocity[i] = 0;
+                }
+                else if (p.Position[i] < XMin(this))
+                {
+                    p.Position[i] = XMin(this);
+                    p.Velocity[i] = 0;
+                }
+            }
+
+            // Obtain particle fitness for new position
+            p.Fitness = Function.Evaluate(p.Position);
+
+            // TODO Post-evaluation hooks, e.g. watershed
+        }
+
         /// <summary>
         /// Update position and velocity of all or some of the particles.
         /// </summary>
@@ -231,7 +270,7 @@ namespace OpenPSO.Lib
                 // Update current particle?
                 if (UpdateStrategy(this)) // TODO Connect this with SS-PSO
                 {
-                    pCurr.Update();
+                    UpdateParticle(pCurr);
                     evals++;
                 }
 

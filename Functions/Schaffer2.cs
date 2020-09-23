@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using OpenPSO.Lib;
 
 namespace OpenPSO.Functions
@@ -26,9 +27,9 @@ namespace OpenPSO.Functions
     /// </remarks>
     public class Schaffer2 : IFunction
     {
-        public double Evaluate(double[] position)
+        public double Evaluate(IList<double> position)
         {
-            if (position.Length != 2)
+            if (position.Count != 2)
                 throw new ArgumentException(
                     $"{nameof(Schaffer2)} function only works in 2D");
 
