@@ -186,6 +186,9 @@ namespace OpenPSO.Lib
                 // Update all particles
                 UpdateParticles();
 
+                // Call end-of-iteration events
+                PostIteration?.Invoke(this);
+
                 // Is the best so far below the stop criteria? If so did we
                 // already saved the number of evaluations required to get below
                 // the stop criteria?
@@ -199,9 +202,6 @@ namespace OpenPSO.Lib
                     if (!cfg.critKeepGoing) break;
 
                 }
-
-                // Call end-of-iteration events
-                PostIteration?.Invoke(this);
 
             } while (TotalEvals < cfg.maxEvals);
         }

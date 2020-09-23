@@ -53,9 +53,12 @@ namespace OpenPSO.Lib
             nDims = 10;
 
             maxEvals = 980_000;
-            criteria = 100;
+            criteria = 10;
             critKeepGoing = false;
-            topology = new GlobalTopology();
+
+            //topology = new VonNeumannGridTopology(7, 7);
+            topology = new MooreGridTopology(7, 7);
+            //topology = new GlobalTopology(50);
         }
 
     }
