@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace OpenPSO.Lib.Topologies
 {
+    // TODO This topology can in practice be removed, just do GBest = true
     public class GlobalTopology : ITopology
     {
         private int popSize;

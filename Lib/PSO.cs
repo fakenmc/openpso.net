@@ -87,7 +87,7 @@ namespace OpenPSO.Lib
             Func<PSO, double> xMin,
             Func<PSO, double> xMax,
             Func<PSO, double> vMax,
-            GroupBestPosition grpBestPosition,
+            GroupBestPosition grpBestPosition, // TODO If topology == null, then assume global, no need for this enum
             double initXMin,
             double initXMax,
             IFunction function,
@@ -95,7 +95,7 @@ namespace OpenPSO.Lib
             int maxEvals,
             double criteria,
             bool critKeepGoing,
-            ITopology topology)
+            ITopology topology) // TODO If topology == null, then assume global
         {
             UpdateStrategy = updateStrategy;
             W = w;
@@ -275,6 +275,7 @@ namespace OpenPSO.Lib
             {
                 // TODO Update or not to update according to SS-PSO
 
+                // TODO This loop maybe irrelevant with GBest=true ("global topology")
                 // Cycle through neighbors
                 foreach (Particle pNeigh in Topology.GetNeighbors(pCurr))
                 {
