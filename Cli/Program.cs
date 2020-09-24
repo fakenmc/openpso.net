@@ -16,17 +16,17 @@ namespace OpenPSO.Cli
                     p => 0.729844, // inertia weight
                     p => 1.494,    // c1
                     p => 1.494,    // c2
-                    p => -600,      // xMin
-                    p => 600,       // xMax
+                    p => -0.5,      // xMin
+                    p => 0.5,       // xMax
                     p => 100,       // vMax
-                    300,          // Initial xMin
-                    600,          // Initial xMax
-                    new Griewank(),  // Function
+                    -0.5,          // Initial xMin
+                    0.2,          // Initial xMax
+                    new Weierstrass(),  // Function
                     10,            // Number of dimensions in function
                     980_000,       // Max. evaluations
-                    0.05,            // Criterion
+                    0.01,            // Criterion
                     false,         // Keep going after criteria's been met?
-                    new StaticRingTopology(49, 3) //new GlobalTopology(49)  // Topology
+                    new StaticRingTopology(49, 5) //new GlobalTopology(49)  // Topology
                 );
                 // new VonNeumannGridTopology(7, 7);
                 // new MooreGridTopology(7, 7);
