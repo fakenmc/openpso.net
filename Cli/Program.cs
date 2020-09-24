@@ -26,7 +26,7 @@ namespace OpenPSO.Cli
                     980_000,       // Max. evaluations
                     0.05,            // Criterion
                     false,         // Keep going after criteria's been met?
-                    new GlobalTopology(49)  // Topology
+                    new StaticRingTopology(49, 3) //new GlobalTopology(49)  // Topology
                 );
                 // new VonNeumannGridTopology(7, 7);
                 // new MooreGridTopology(7, 7);
