@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 
-namespace OpenPSO.Lib
+namespace OpenPSO.Functions
 {
     public static class Perlin2d
     {
-        static readonly int SEED = 0;
+        private static readonly int SEED = 0;
 
-        static readonly int[] hash = new int[256]
+        private static readonly int[] hash = new int[256]
               { 208,34,231,213,32,248,233,56,161,78,24,140,71,48,140,254,245,255,247,247,40,
                 185,248,251,245,28,124,204,204,76,36,1,107,28,234,163,202,224,245,128,167,204,
                 9,92,217,54,239,174,173,102,193,189,190,121,100,108,167,44,43,77,180,204,8,81,
@@ -22,7 +20,7 @@ namespace OpenPSO.Lib
                 135,176,183,191,253,115,184,21,233,58,129,233,142,39,128,211,118,137,139,255,
                 114,20,218,113,154,27,127,246,250,1,8,198,250,209,92,222,173,21,88,102,219 };
 
-        static int Noise2(int x, int y)
+        private static int Noise2(int x, int y)
         {
             int yindex = (y + SEED) % 256;
             if (yindex < 0)
@@ -34,12 +32,12 @@ namespace OpenPSO.Lib
             return result;
         }
 
-        static double LinearInterpolation(double x, double y, double s)
+        private static double LinearInterpolation(double x, double y, double s)
         {
             return x + s * (y - x);
         }
 
-        static double SmoothInterpolation(double x, double y, double s)
+        private static double SmoothInterpolation(double x, double y, double s)
         {
             return LinearInterpolation(x, y, s * s * (3 - 2 * s));
         }

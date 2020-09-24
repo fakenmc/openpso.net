@@ -1,4 +1,5 @@
 ﻿using OpenPSO.Lib;
+using System;
 using System.Collections.Generic;
 
 namespace OpenPSO.Functions
@@ -9,7 +10,8 @@ namespace OpenPSO.Functions
         {
             if (position.Count != 2)
             {
-                throw new System.NotImplementedException("PerlinLandscape function only defined for 2 dimensions!");
+                throw new ArgumentException(
+                    $"{nameof(PerlinLandscape)} function only works in 2D");
             }
 
             double fitness = 0.0;
