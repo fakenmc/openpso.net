@@ -148,6 +148,7 @@ namespace OpenPSO.Lib
                 // Determine fitness for initial position
                 fitness = Function.Evaluate(position); // TODO Doesn't this count for PSO.TotalEvals?
 
+                // TODO In practice it should be the topology to control particle ID
                 particles[i] = new Particle(i, fitness, position, velocity);
 
                 // TODO Hooks such as watershed
