@@ -95,7 +95,8 @@ namespace OpenPSO.Lib
             int maxEvals,
             double criteria,
             bool critKeepGoing,
-            ITopology topology) // TODO If topology == null, then assume global
+            ITopology topology, // TODO If topology == null, then assume global
+            int? seed = null)
         {
             UpdateStrategy = updateStrategy;
             W = w;
@@ -131,7 +132,7 @@ namespace OpenPSO.Lib
                     break;
             }
             TotalEvals = 0;
-            rng = new Random();
+            rng = seed.HasValue ? new Random(seed.Value) : new Random();
 
             // Initialize individual particles
             for (int i = 0; i < topology.PopSize; i++)
