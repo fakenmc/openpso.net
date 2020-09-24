@@ -53,9 +53,6 @@ namespace OpenPSO.Lib
         // Worst fitness and particle ID at each iteration
         private (double fitness, Particle particle) worstCurr;
 
-        // Average fitness at each iteration
-        private double avgFitCurr;
-
         // Random number generator
         private Random rng;
 
@@ -69,6 +66,9 @@ namespace OpenPSO.Lib
         // ////////////////////////////// //
         // Publicly accessible properties //
         // ////////////////////////////// //
+
+        // Average fitness at each iteration
+        public double AvgFitCurr { get; private set; }
 
         public (double fitness, ReadOnlyCollection<double> position) BestSoFar
             => (bestSoFar.fitness, Array.AsReadOnly(bestSoFar.position));
@@ -213,7 +213,7 @@ namespace OpenPSO.Lib
             }
 
             // Determine average fitness in the population
-            avgFitCurr = sumFitness / Topology.PopSize;
+            AvgFitCurr = sumFitness / Topology.PopSize;
 
             // Call post-update population data events
             PostUpdatePopData?.Invoke(this);
