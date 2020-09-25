@@ -4,6 +4,12 @@ using System.Collections.Generic;
 
 namespace OpenPSO.Functions
 {
+    /// <summary>
+    /// Perlin landscape function.
+    /// </summary>
+    /// <remarks>
+    /// This function is mainly used for procedural landscape generation.
+    /// </remarks>
     public class PerlinLandscape : IFunction
     {
         private int octaves = 8;
