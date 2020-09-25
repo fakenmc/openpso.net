@@ -25,7 +25,9 @@ namespace OpenPSO.Functions
     /// </remarks>
     public class Weierstrass : IFunction
     {
-        public double Evaluate(IList<double> position)
+        public double Evaluate(IList<double> position) => Function(position);
+
+        public static double Function(IList<double> position)
         {
             int i, j;
             double res;
@@ -54,7 +56,6 @@ namespace OpenPSO.Functions
                 sum += Math.Pow(a, j)
                     * Math.Cos(2.0 * Math.PI * Math.Pow(b, j) * 0.5);
             }
-
             return res - position.Count * sum;
         }
     }

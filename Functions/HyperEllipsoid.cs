@@ -5,7 +5,9 @@ namespace OpenPSO.Functions
 {
     public class HyperEllipsoid : IFunction
     {
-        public double Evaluate(IList<double> position)
+        public double Evaluate(IList<double> position) => Function(position);
+
+        public static double Function(IList<double> position)
         {
             double fitness = 0.0;
 
@@ -15,5 +17,6 @@ namespace OpenPSO.Functions
             }
             return fitness;
         }
+
     }
 }
